@@ -6,25 +6,8 @@ from langchain.agents import create_agent
 from langchain.tools import tool
 from langchain_core.messages import HumanMessage
 from langchain_ollama import ChatOllama
-from tavily import TavilyClient
+from langchain_tavily import TavilySearch
 
-tavily = TavilyClient()
-
-@tool
-def search(query: str) -> str:
-    """
-    Tool that search over the internet
-
-    Args:
-        query: The query to search for
-
-    Returns:
-        The search result
-    """
-    print(f"Searching for {query}")
-    return tavily.search(
-        query=query
-    )
 
 
 llm = ChatOllama(
@@ -33,7 +16,7 @@ llm = ChatOllama(
     base_url="https://ollama.com"
 )
 
-tools = [search]
+tools = [TavilySearch()]
 
 agent = create_agent(
     model=llm,
