@@ -38,9 +38,9 @@ def apply_discount(price: float, discount_tier: str) -> float:
     """
     print(f"    >> Executing apply_discount(price = {price}, discount_tier = '{discount_tier}')")
     discount_percentages = {
-        "bronze": 5,
-        "silver": 12,
-        "gold": 23
+        "Bronze": 5,
+        "Silver": 12,
+        "Gold": 23
     }
     discount = discount_percentages.get(discount_tier, 0)
     return round(price * (1 - discount / 100), 2)
