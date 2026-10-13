@@ -9,7 +9,7 @@ from langchain.messages import HumanMessage, SystemMessage, ToolMessage
 from langsmith import traceable
 
 MAX_INTERATIONS = 10
-MODEL = "gemma4:e4b"
+MODEL = "gemma4:31b-cloud"
 
 # --- Tools (LangChain @tool decorator) ---
 
@@ -59,8 +59,9 @@ def run_agent(question: str):
     }
 
     llm = init_chat_model(
-        f"Ollama: {MODEL}",
-        temperature=0
+        f"ollama: {MODEL}",
+        temperature=0,
+
     )
 
     llm_with_tools = llm.bind_tools(tools=tools)
@@ -102,6 +103,31 @@ def run_agent(question: str):
         if not tool_calls:
             print(f"\nFinal Answer: {ai_message.content}")
             return ai_message.content
+
+     # Process only the FIRST tool call — force one tool per iteration
+        tool_call = tool_calls[0]
+        tool_name = tool_call.get("name")
+        tool_args = tool_call.get("args", {})
+        tool_call_id = tool_call.get("id")
+
+        print(f"  [Tool Selected] {tool_name} with args: {tool_args}")
+
+        tool_to_use = tools_dict.get(tool_name)
+        if tool_to_use is None:
+            raise ValueError(f"Tool '{tool_name}' not found")
+
+        observation = tool_to_use.invoke(tool_args)
+
+        print(f"  [Tool Result] {observation}")
+
+        messages.append(ai_message)
+        messages.append(
+            ToolMessage(content=str(observation), tool_call_id=tool_call_id)
+        )
+
+    print("ERROR: Max iterations reached without a final answer")
+    return None
+
 
 if __name__ == "__main__":
     print("Hello LangChain Agent (.bind_tools)!")
